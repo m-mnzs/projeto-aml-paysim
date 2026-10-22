@@ -26,7 +26,7 @@ No ecossistema de pagamentos digitais, criminosos frequentemente utilizam redes 
 3. **Análise Comportamental:** Constatação de que o valor médio das fraudes é ~4x superior ao das transações legítimas, com uma taxa de esvaziamento de saldo de quase 98%.
 4. **Network / Graph Analysis:** Mapeamento visual das conexões de transferência entre contas suspeitas utilizando grafos direcionados.
 ### Mapeamento de Redes (Graph Analytics)
-![Mapa de Redes de Contas Laranjas](mapa_redes_fraude.png)
+![Mapa de Redes de Contas Laranjas](mapa_redes_fraudes.png)
 *Visualização de conexões entre contas de origem e destino em transações fraudulentas (NetworkX).*
 
 ---
