@@ -40,9 +40,9 @@ O dataset PaySim possui colunas de saldo bruto (`oldbalanceOrg`, `newbalanceOrig
 
 As variáveis de desvio contábil foram calculadas da seguinte forma:
 
-$$\text{erro\_origem} = (\text{oldbalanceOrg} - \text{amount}) - \text{newbalanceOrig}$$
+`erro_origem = (oldbalanceOrg - amount) - newbalanceOrig`
 
-$$\text{erro\_destino} = (\text{oldbalanceDest} + \text{amount}) - \text{newbalanceDest}$$
+`erro_destino = (oldbalanceDest + amount) - newbalanceDest`
 
 ---
 
