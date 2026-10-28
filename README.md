@@ -35,10 +35,14 @@ No ecossistema de pagamentos digitais, criminosos frequentemente utilizam redes 
 
 ## Fase 2: O Desafio do *Data Leakage* e Engenharia de Recursos
 O dataset PaySim possui colunas de saldo bruto (`oldbalanceOrg`, `newbalanceOrig`, etc.) que carregam a regra matemática exata do simulador. 
-* **O Problema:** Alimentar modelos com essas colunas faz com que o algoritmo "decore" o gabarito interno do simulador, mascarando a real capacidade de generalização.
-* **A Solução (Erros Contábeis):** Removemos as colunas brutas e criamos *features* de desvio contábil para capturar inconsistências financeiras reais:
-  $$\text{erro\_origem} = (\text{oldbalanceOrg} - \text{amount}) - \text{newbalanceOrig}$$
-  $$\text{erro\_destino} = (\text{oldbalanceDest} + \text{amount}) - \text{newbalanceDest}$$
+- **O Problema:** Alimentar modelos com essas colunas faz com que o algoritmo "decore" o gabarito interno do simulador, mascarando a real capacidade de generalização.
+- **A Solução (Erros Contábeis):** Removemos as colunas brutas e criamos *features* de desvio contábil para capturar inconsistências financeiras reais.
+
+As variáveis de desvio contábil foram calculadas da seguinte forma:
+
+$$\text{erro\_origem} = (\text{oldbalanceOrg} - \text{amount}) - \text{newbalanceOrig}$$
+
+$$\text{erro\_destino} = (\text{oldbalanceDest} + \text{amount}) - \text{newbalanceDest}$$
 
 ---
 
