@@ -1,12 +1,24 @@
-# Banco de dados SQLite
-paysim_banco.db
-
-# Dataset bruto do Kaggle (pesado e excederia o limite do GitHub)
-*.csv
-
-# Ambiente virtual Python
-.venv/
-
-# Cache do Python e checkpoints do Jupyter Notebook
+# Python / Ambientes Virtuais
 __pycache__/
-.ipynb_checkpoints/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+
+# Banco de dados SQLite Local
+data/paysim_banco.db
+
+# Dataset bruto do Kaggle 
+data/PS_20174392719_1491204439457_log.csv
+
+# IDEs e Editores
+.vscode/
+.idea
+
+# Arquivos do Sistema Operacional
+.DS_Store
+Thumbs.db

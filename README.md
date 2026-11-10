@@ -1,101 +1,105 @@
-# Operação Pega-Laranja: Investigação de Redes, Engenharia Anti-Leakage e Modelagem Preditiva (AML)
+# Operação Pega-Laranja: Investigação de Redes e Modelagem Anti-Fraude (AML)
 
-Pipeline completo de Ciência de Dados de ponta a ponta desenvolvido para simulação e análise de **Prevenção à Fraude e Anti-Lavagem de Dinheiro (AML)**, investigando o comportamento de contas laranjas (*mule accounts*) e implementando modelos preditivos de alta performance com o dataset **PaySim**.
+Pipeline completo de Ciência de Dados desenvolvido para simulação e análise de **Prevenção à Fraude e Anti-Lavagem de Dinheiro (AML)**, investigando contas laranjas (*mule accounts*) no dataset **PaySim** com foco em engenharia anti-leakage, graph analytics e interpretabilidade de modelos.
 
 ---
 
 ## Visão Geral do Projeto
-No ecossistema de pagamentos digitais, criminosos frequentemente utilizam redes de contas intermediárias para pulverizar e lavar dinheiro roubado antes de efetuar o saque final. O projeto aborda o problema sob a ótica de um ambiente corporativo de engenharia de risco, estruturado em duas grandes frentes:
+
+No ecossistema de pagamentos digitais, criminosos frequentemente utilizam redes de contas intermediárias para pulverizar e lavar dinheiro roubado antes de efetuar o saque final. Este projeto aborda o problema sob a ótica de um ambiente corporativo de ciência de dados aplicada à análise de risco, utilizando o dataset público **PaySim (Financial Datasets for Fraud Detection)**, disponível no [Kaggle](https://www.kaggle.com/datasets/ealaxi/paysim1).
+
+O pipeline é estruturado em duas grandes frentes:
+
 1. **Fase Exploratória e de Redes:** Ingestão de mais de 6 milhões de registros em banco SQLite, auditoria de dados, consultas SQL avançadas e mapeamento visual de grafos de transferência.
-2. **Fase Preditiva e Anti-Leakage:** Mitigação de vazamento de dados estrutural, criação de engenharia de recursos contábeis, comparação rigorosa de algoritmos (Regressão Logística, XGBoost e LightGBM) e otimização focada em impacto de negócio.
+2. **Fase Preditiva e Anti-Leakage:** Mitigação de vazamento de dados estrutural, criação de engenharia de recursos contábeis, comparação rigorosa de algoritmos (Regressão Logística e XGBoost) e otimização focada em impacto de negócio.
 
 ---
 
-## Tecnologias e Ferramentas Utilizadas
-- **Python 3.x** (Linguagem principal)
-- **SQLite & SQL** (Armazenamento relacional otimizado por lotes/chunks e indexação)
-- **Pandas & NumPy** (Manipulação e estruturação de dados)
-- **Scikit-Learn** (Métricas, pré-processamento e modelos lineares)
-- **XGBoost & LightGBM** (Algoritmos de *Ensemble* baseados em árvores)
-- **NetworkX & Matplotlib / Seaborn** (Análise de redes e visualizações estratégicas)
+## Tecnologias Utilizadas
+
+- **Linguagem:** Python 3.x
+- **Banco de Dados:** SQLite & SQL
+- **Manipulação & Modelagem:** Pandas, NumPy, Scikit-Learn (Modelos Lineares / Baseline)
+- **Ensembles:** XGBoost
+- **Redes & Visualização:** NetworkX, Matplotlib, Seaborn
 
 ---
 
-## Fase 1: Exploração, EDA e Análise de Redes (Graph Analytics)
+## Destaques Técnicos & Abordagem
 
-### Principais Descobertas Iniciais:
-* **Escopo de Risco:** Auditoria confirmou que **100% das fraudes** ocorrem exclusivamente nas modalidades de transferência (`TRANSFER`) e saque (`CASH_OUT`).
-* **Assinatura Comportamental:** O valor médio das fraudes é consideravelmente superior ao das transações legítimas, caracterizado pelo esvaziamento total do saldo de origem (`newbalanceOrig = 0`).
-
-### Mapeamento de Redes (Graph Analytics)
-![Mapa de Redes de Contas Laranjas](output/mapa_redes_fraudes.png)
-*Visualização de conexões entre contas de origem e destino em transações fraudulentas utilizando NetworkX.*
+- **Graph Analytics (NetworkX):** Mapeamento de redes de transferência para identificar padrões topológicos de esvaziamento de contas e pulverização de capital.
+- **Mitigação de Data Leakage:** Identificação e remoção de colunas estruturais do simulador que geravam vazamento de dados, substituindo-as por engenharia de recursos contábeis (`erro_origem` e `erro_destino`).
+- **Modelagem Preditiva:** Comparação entre Regressão Logística e **XGBoost**, equilibrando o Recall de fraudes com a contenção severa de falsos positivos.
 
 ---
 
-## Fase 2: O Desafio do *Data Leakage* e Engenharia de Recursos
-O dataset PaySim possui colunas de saldo bruto (`oldbalanceOrg`, `newbalanceOrig`, etc.) que carregam a regra matemática exata do simulador. 
-- **O Problema:** Alimentar modelos com essas colunas faz com que o algoritmo "decore" o gabarito interno do simulador, mascarando a real capacidade de generalização.
-- **A Solução (Erros Contábeis):** Removemos as colunas brutas e criamos *features* de desvio contábil para capturar inconsistências financeiras reais.
+## Arquitetura e Fluxo do Projeto
 
-As variáveis de desvio contábil foram calculadas da seguinte forma:
-
-`erro_origem = (oldbalanceOrg - amount) - newbalanceOrig`
-
-`erro_destino = (oldbalanceDest + amount) - newbalanceDest`
+1. **Ingestão e Banco Relacional:** Processamento de 6+ milhões de registros utilizando chunks em SQLite para otimização de memória.
+2. **Análise Exploratória (EDA):** Auditoria comportamental comprovando que 100% das fraudes ocorrem em transferências e saques.
+3. **Engenharia Anti-Leakage:** Criação de variáveis de desvio contábil que responderam por mais de **90% do ganho de informação** do modelo final.
+4. **Machine Learning & Otimização:** O **XGBoost** atingiu **99% de Recall** reduzindo em **74% os falsos positivos** em comparação aos modelos lineares, preservando a experiência de clientes legítimos (*UX*).
 
 ---
 
-## Fase 3: Jornada de Modelagem e Resultados
+## Resultados e Performance do Modelo
 
-| Modelo | Estratégia / Ajuste | Recall (Fraudes) | Falsos Positivos | Status no Projeto |
-| :--- | :--- | :---: | :---: | :--- |
-| **Regressão Logística (Baseline)** | Dados crus (Com Vazamento) | 46% | 111 | Descartado (Data Leakage) |
-| **Regressão Logística (Limpo)** | Base higienizada (Sem Leakage) | 43% | 155 | Teto dos modelos lineares |
-| **Regressão Logística (Otimizado)** | Pesos balanceados + Threshold = 0.20 | **99%** | 173.870 | Inviável operacionalmente (Excesso de alarmes) |
-| **XGBoost** | `scale_pos_weight` + Base limpa | **99%** | **45.316** | **Modelo Campeão** |
-| **LightGBM** | `scale_pos_weight` + Base limpa | **99%** | 89.668 | Rápido, mas alto volume de falsos positivos |
+A avaliação no conjunto de teste isolado (`30%` da base, estratificada) demonstrou uma evolução drástica de desempenho:
 
-### Evidências Visuais do XGBoost Campeão:
-* **Matriz de Confusão (Heatmap):** Evidencia o alto poder de captura com controle rigoroso de falsos alarmes.
-![Matriz de Confusão XGBoost](output/output_matriz_confusao_xgboost.png)
-* **Feature Importance (Gain):** Prova que a *feature* criada `erro_origem` responde por mais de **90% do ganho de informação** do modelo, atestando o sucesso da abordagem anti-leakage.
-![Importância das Features XGBoost](output/output_importancia_features_xgboost.png)
+- **Taxa de Captura (Recall):** **99%** (capturou 2.444 das 2.464 fraudes reais na base de teste, deixando escapar apenas 20 ocorrências).
+- **Redução de Falsos Positivos:** O XGBoost reduziu em **74% o volume de alarmes falsos** em comparação ao modelo linear otimizado (caindo de ~173 mil para ~45 mil falsos positivos), mantendo o mesmo nível de blindagem.
+- **Métrica PR-AUC:** **0.8139**, comprovando a robustez estatística do classificador em cenários de forte desbalanceamento.
+
+### Artefatos Visuais Principais
+
+- **Importância das Variáveis:** O ganho de informação revelou que `erro_origem` concentrou **90,59%** da relevância do modelo, provando o sucesso da blindagem anti-leakage.
+![features_importance_xgboost](output/features_importance_xgboost.png)
+- **Curva Precision-Recall:** Mapeia o *trade-off* estável entre a precisão dos alertas e a taxa de captura de fraudes.
+![curva_pr_auc_xgboost](output/curva_precision_recall_xgboost.png)
 
 ---
 
-## Impacto de Negócio e Considerações para Produção
+## Visão Aplicada ao Negócio & Produção
 
-1. **Apetite ao Risco (*Security*):** Com uma taxa de captura (*Recall*) de **99%**, o modelo blindou o sistema contra quase a totalidade das tentativas de fraude, prevenindo perdas financeiras e riscos de conformidade regulatória (Banco Central / COAF).
-2. **Eficiência Operacional:** O **XGBoost** cortou em quase **74% o volume de falsos positivos** em comparação à Regressão Logística otimizada, preservando a experiência de dezenas de milhares de clientes legítimos (*UX*).
-3. **Próximos Passos (Arquitetura de Produção):**
-   * **Fila de Análise Humana (*Human-in-the-loop*):** Encaminhar transações de média probabilidade para validação via SMS/Biometria em vez de bloqueio automático cego.
-   * **Limiares Dinâmicos:** Aplicar regras mais restritas para faixas de valores elevados.
+Em ambientes reais de tecnologia financeira, métricas puras de laboratório precisam ser traduzidas em impacto operacional:
+
+- **Mitigação de Risco Regulatório:** Com **99% de Recall**, o modelo blinda a instituição contra perdas financeiras diretas e penalidades severas de órgãos reguladores (Banco Central e COAF).
+- **Experiência do Cliente (Fricção Operacional):** Bloquear clientes legítimos por engano destrói o *User Experience*. Para mitigar os falsos positivos remanescentes em produção, recomenda-se que transações sinalizadas de média probabilidade passem por **autenticação em duas etapas via SMS/biometria (*Step-Up Authentication*)**, reservando o bloqueio automático estrito apenas para operações de altíssimo risco.
+
+---
+
+## Estrutura do Repositório
+
+```txt
+projeto-aml-paysim/
+│
+├── data/                    # Banco SQLite e bases 
+├── notebooks/               # Jupyter Notebooks de EDA e Modelagem
+│   ├── 02_eda_e_investigacao.ipynb
+│   └── 03_modelo_ml_preditivo.ipynb
+├── src/                     # Scripts de ingestão e pipeline em .py
+│   └── 01_ingestao_dados.py
+├── output/                  # Gráficos e matrizes geradas
+├── .gitignore
+├── README.md
+└── requirements.txt
+```
 
 ---
 
 ## Como Executar o Projeto
 
-Clone o repositório para o seu ambiente local:
+Clone o repositório:
+
 ```bash
-git clone https://github.com/m-mnzs/projeto-aml-paysim.git 
+git clone https://github.com/m-mnzs/projeto-aml-paysim.git
+cd projeto-aml-paysim
 ```
-Acesse o diretório do projeto e instale as dependências necessárias:
-```bash 
-pip install pandas numpy scikit-learn xgboost lightgbm matplotlib seaborn networkx
+
+Instale as dependências:
+
+```bash
+pip install -r requirements.txt
 ```
-Execute os scripts e notebooks na pasta notebooks/ seguindo a numeração sequencial para reproduzir a ingestão, a EDA e a modelagem preditiva. 
 
----
-
-## Estrutura do Repositório
-```text
-projeto_aml_paysim/
-│
-├── data/                      # Banco SQLite e bases processadas
-├── notebooks/                 # Jupyter Notebooks organizados por etapas
-│   ├── 01_ingestao_dados.py   # Script de engenharia e criação do banco SQLite
-│   ├── 02_eda_e_investigacao.ipynb # EDA, queries SQL e NetworkX
-│   └── 03_modelo_ml_preditivo.ipynb # Modelagem, anti-leakage e ensembles
-├── output/                   # Gráficos, matrizes de confusão e mapas de redes
-└── README.md                  # Documentação oficial do projeto
+Execute o script na pasta src/ e notebooks na pasta notebooks/ seguindo a numeração sequencial para reproduzir a ingestão, a EDA e a modelagem preditiva.
